@@ -1,12 +1,13 @@
-# Script per generare dei piani a partire dal dataset di test.
-# I piani generati vengono salvati nella cartella di output indicata
-# tramite le opzioni. Nel caso non si aggiunga alcuna azione all'input
-# i piani generati verranno salvati nella cartella 0_actions, con un'azione
-# in input nella cartella 1_actions e così via.
-# Al momento non viene fatto un loop sul numero di azioni: per generare i
-# piani con zero azioni in input bisogna lanciare lo script una volta, per
-# generare i piani con una azione input bisogna lanciare lo script un'altra
-# volta e così via.
+# Script for generating plans from the test dataset.
+# The generated plans are saved in the specified output directory
+# using the provided options. If no actions are added to the input,
+# the generated plans will be saved in the "0_actions" directory.
+# If one action is added to the input, the plans will be saved in the
+# "1_actions" directory, and so on.
+# Currently, there is no loop over the number of actions. To generate
+# plans with zero actions in the input, the script needs to be run once.
+# To generate plans with a percentage of actions in the input, the script needs to be
+# run again, and so on.
 import time
 
 import torch
@@ -35,11 +36,11 @@ from typing import Optional
 import new_rewards as metric
 
 
-# Definizione delle possibili opzioni
+# Class used to define the possible arguments for training
 @dataclass
 class PlanGenerationArgs:
     """
-    Opzioni per la generazione dei piani.
+    Options for plan generation.
     """
     dataset_dir: Optional[str] = field(
         default="dataset/json/logistics_invariants/20_plans.json",
