@@ -1098,7 +1098,7 @@ def parse_problem(plan, domain):
     #print("Ho impiegato " + str(end-start))
     return (result_goals[0], result_goals[1], result_goals[2], number_missing_actions)
 
-def rimuovi_spazi(stringa):
+def remove_blanks(stringa):
     return re.sub(r'\s+(\d)', r'\1', stringa)
 
 
