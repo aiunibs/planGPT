@@ -616,236 +616,6 @@ dict_actions_f['move-left'] = (
     ["robot-at 0 1", "clear 2"]
 )
 
-# ChildSnack
-
-dict_actions_c = {}
-dict_predicates_c = {}
-dict_objects_c =  {}
-
-dict_objects_c["child"] = ["child"]
-dict_objects_c["bread-portion"] = ["bread"]
-dict_objects_c["content-portion"] = ["content"]
-dict_objects_c["place"] = ["table", "kitchen"]
-dict_objects_c["tray"] = ["tray"]
-dict_objects_c["sandwich"] = ["sandw"]
-
-dict_predicates_c["at-kitchen-bread"] = (
-    ["bread-portion"]
-    )
-dict_predicates_c["at-kitchen-content"] = (
-    ["content-portion"]
-    )
-dict_predicates_c["at-kitchen-sandwich"] = (
-    ["sandwich"]
-    )
-dict_predicates_c["no-gluten-bread"] = (
-    ["bread-portion"]
-    )
-dict_predicates_c["no-gluten-content"] = (
-    ["content-portion"]
-    )
-dict_predicates_c["no-gluten-sandwich"] = (
-    ["sandwich"]
-    )
-dict_predicates_c["ontray"] = (
-    ["sandwich"],
-    ["tray"]
-    )
-dict_predicates_c["allergic-gluten"] = (
-    ["child"]
-    )
-dict_predicates_c["not-allergic-gluten"] = (
-    ["child"]
-    )
-dict_predicates_c["served"] = (
-    ["child"]
-    )
-dict_predicates_c["waiting"] = (
-    ["child"],
-    ["place"]
-    )
-dict_predicates_c["at"] = (
-    ["tray"],
-    ["place"]
-    )
-dict_predicates_c["notexist"] = (
-    ["sandwich"],
-    )
-#dict_predicates_c["kitchen"] = (["tray"],)
-
-dict_predicates_c["child"] = (["child"])
-dict_predicates_c["tray"] = (["tray"])
-dict_predicates_c["place"] = (["place", "table", "kitchen"])
-dict_predicates_c["sandwich"] = (["sandwich"])
-dict_predicates_c["content-portion"] = (["content-portion"])
-dict_predicates_c["bread-portion"] = (["bread-portion"])
-
-dict_actions_c['make-sandwich-no-gluten'] = (
-    ["sandwich", "bread-portion", "content-portion"], #oggetti
-    ["at-kitchen-bread 1", "at-kitchen-content 2", "no-gluten-bread 1", "no-gluten-content 2", "notexist 0"],  #precondizioni
-    ["at-kitchen-sandwich 0", "no-gluten-sandwich 0"], #addtitivi
-    ["at-kitchen-bread 1", "at-kitchen-content 2", "notexist 0"] #sottrattivi
-)
-
-dict_actions_c['make-sandwich'] = (
-    ["sandwich", "bread-portion", "content-portion"], #oggetti
-    ["at-kitchen-bread 1", "at-kitchen-content 2", "notexist 0"],  #precondizioni
-    ["at-kitchen-sandwich 0"], #addtitivi
-    ["at-kitchen-bread 1", "at-kitchen-content 2", "notexist 0"] #sottrattivi
-)
-
-dict_actions_c['put-on-tray'] = (
-    ["sandwich", "tray",], #oggetti
-    ["at-kitchen-sandwich 0"],
-    #["at-kitchen-sandwich 0", "at 1 2"],  #precondizioni
-    ["ontray 0 1"], #addtitivi
-    ["at-kitchen-sandwich 0"] #sottrattivi
-)
-
-dict_actions_c["serve-sandwich-no-gluten"] = (
-    ["sandwich", "child", "tray", "place"], #oggetti
-    ["allergic-gluten 1", "ontray 0 2", "waiting 1 3", "no-gluten-sandwich 0", "at 2 3"],  #precondizioni
-    ["served 1"], #addtitivi
-    ["ontray 0 2"] #sottrattivi
-)
-
-dict_actions_c["serve-sandwich"] = (
-    ["sandwich", "child", "tray", "place"], #oggetti
-    ["not-allergic-gluten 1", "ontray 0 2", "waiting 1 3", "at 2 3"],  #precondizioni
-    ["served 1"], #addtitivi
-    ["ontray 0 2"] #sottrattivi
-)
-
-dict_actions_c["move-tray"] = (
-    ["tray", "place", "place"], #oggetti
-    ["at 0 1"],  #precondizioni
-    ["at 0 2"], #addtitivi
-    ["at 0 1"] #sottrattivi
-)
-
-#### ROVERS
-dict_actions_r = {}
-dict_predicates_r = {}
-dict_objects_r =  {}
-
-dict_objects_r["rover"] = ["rover"]
-dict_objects_r["waypoint"] = ["waypoint"]
-dict_objects_r["store"] = ["store"]
-dict_objects_r["camera"] = ["camera"]
-dict_objects_r["mode"] = ["mode", "high-res", "low-res", "colour"]
-dict_objects_r["lander"] = ["lander", "general"]
-dict_objects_r["objective"] = ["objective"]
-
-dict_predicates_r["rover"] = (["rover"])
-dict_predicates_r["waypoint"] = (["waypoint"])
-dict_predicates_r["store"] = (["store"])
-dict_predicates_r["camera"] = (["camera"])
-dict_predicates_r["mode"] = (["mode"])
-dict_predicates_r["lander"] = (["lander"])
-dict_predicates_r["objective"] = (["objective"])
-
-dict_predicates_r["at"] = ( #at_rover?
-    ["rover"], ["waypoint"])
-dict_predicates_r["at-lander"] = (
-    ["lander"], ["waypoint"])
-dict_predicates_r["can-traverse"] = (
-    ["rover"], ["waypoint"], ["waypoint"])
-dict_predicates_r["equipped-for-soil-analysis"] = (
-    ["rover"])
-dict_predicates_r["equipped-for-rock-analysis"] = (
-    ["rover"])
-dict_predicates_r["equipped-for-imaging"] = (
-    ["rover"])
-dict_predicates_r["empty"] = (
-    ["store"])
-dict_predicates_r["full"] = (
-    ["store"])
-dict_predicates_r["have-rock-analysis"] = (
-    ["rover"], ["waypoint"])
-dict_predicates_r["have-soil-analysis"] = (
-    ["rover"], ["waypoint"])
-dict_predicates_r["calibrated"] = (
-    ["camera"], ["rover"])
-dict_predicates_r["supports"] = (
-    ["camera"], ["mode"])
-dict_predicates_r["visible"] = (
-    ["waypoint"], ["waypoint"])
-dict_predicates_r["have-image"] = (
-    ["rover"], ["objective"], ["mode"])
-dict_predicates_r["communicated-soil-data"] = (
-    ["waypoint"])
-dict_predicates_r["communicated-rock-data"] = (
-    ["waypoint"])
-dict_predicates_r["communicated-image-data"] = (
-    ["objective"], ["mode"])
-dict_predicates_r["at-soil-sample"] = (
-    ["waypoint"])
-dict_predicates_r["at-rock-sample"] = (
-    ["waypoint"])
-dict_predicates_r["visible-from"] = (
-    ["objective"], ["waypoint"])
-dict_predicates_r["store-of"] = (
-    ["store"], ["rover"])
-dict_predicates_r["calibration-target"] = (
-    ["camera"], ["objective"])
-dict_predicates_r["on-board"] = (
-    ["camera"], ["rover"])
-
-dict_actions_r["navigate"] = (
-    ["rover", "waypoint", "waypoint"], #oggetti
-    ["can-traverse 0 1 2", "at 0 1", "visible 1 2"],  #precondizioni
-    ["at 0 2"], #addtitivi
-    ["at 0 1"] #sottrattivi
-)
-dict_actions_r["sample-soil"] = (
-    ["rover", "store", "waypoint"], #oggetti
-    ["at 0 2", "at-soil-sample 2", "equipped-for-soil-analysis 0", "store-of 1 0", "empty 1"],  #precondizioni
-    ["full 1", "have-soil-analysis 0 2"], #addtitivi
-    ["empty 1", "at-soil-sample 2"] #sottrattivi
-)
-dict_actions_r["sample-rock"] = (
-    ["rover", "store", "waypoint"], #oggetti
-    ["at 0 2", "at-rock-sample 2", "equipped-for-rock-analysis 0", "store-of 1 0", "empty 1"],  #precondizioni
-    ["full 1", "have-rock-analysis 0 2"], #addtitivi
-    ["empty 1", "at-rock-sample 2"] #sottrattivi
-)
-dict_actions_r["drop"] = (
-    ["rover", "store"], #oggetti
-    ["store-of 1 0", "full 1"], #precondizioni
-    ["empty 1"], #additivi
-    ["full 1"] #sottrattivi
-)
-dict_actions_r["calibrate"] = (
-    ["rover", "camera", "objective", "waypoint"], #oggetti
-    ["equipped-for-imaging 0", "calibration-target 1 2", "at 0 3", "visible-from 2 3", "on-board 1 0"], #precondizioni
-    ["calibrated 1 0"], #additivi
-    [] #sottrattivi
-)
-dict_actions_r["take-image"] = (
-    ["rover", "waypoint", "objective", "camera", "mode"], #oggetti
-    ["calibrated 3 0", "on-board 3 0", "equipped-for-imaging 0", "supports 3 4", "visible-from 2 1", "at 0 1"], #precondizioni
-    ["have-image 0 2 4"], #additivi
-    ["calibrated 3 0"] #sottrattivi
-)
-dict_actions_r["communicate-soil-data"] = (
-    ["rover", "lander", "waypoint", "waypoint", "waypoint"], #oggetti
-    ["at 0 3", "at-lander 1 4", "have-soil-analysis 0 2", "visible 3 4"], #precondizioni
-    ["communicated-soil-data 2"], #additivi
-    [] #sottrattivi
-)
-dict_actions_r["communicate-rock-data"] = (
-    ["rover", "lander", "waypoint", "waypoint", "waypoint"], #oggetti
-    ["at 0 3", "at-lander 1 4", "have-rock-analysis 0 2", "visible 3 4"], #precondizioni
-    ["communicated-rock-data 2"], #additivi
-    [] #sottrattivi
-)
-dict_actions_r["communicate-image-data"] = (
-    ["rover", "lander", "objective", "mode", "waypoint", "waypoint"], #oggetti
-    ["at 0 4", "at-lander 1 5", "have-image 0 2 3", "visible 4 5"], #precondizioni
-    ["communicated-image-data 2 3"], #additivi
-    [] #sottrattivi
-)
-
 dict_actions_domain = {}
 dict_predicates_domain = {}
 dict_objects_domain =  {}
@@ -892,21 +662,11 @@ dict_predicates_domain['floortile'] = dict_predicates_f
 dict_objects_domain['floortile'] = dict_objects_f
 convert_action_domain['floortile'] = {}
 
-dict_actions_domain['childsnack'] = dict_actions_c
-dict_predicates_domain['childsnack'] = dict_predicates_c
-dict_objects_domain['childsnack'] = dict_objects_c
-convert_action_domain['childsnack'] = {}
-
-
 dict_actions_domain['visitall'] = dict_actions_v
 dict_predicates_domain['visitall'] = dict_predicates_v
 dict_objects_domain['visitall'] = dict_objects_v
 convert_action_domain['visitall'] = {}
 
-dict_actions_domain['rovers'] = dict_actions_r
-dict_predicates_domain['rovers'] = dict_predicates_r
-dict_objects_domain['rovers'] = dict_objects_r
-convert_action_domain['rovers'] = {}
 
 def unite_actions(input, keywords, domain, separator="_"):
     for conversion in convert_action_domain[domain].keys():
@@ -922,17 +682,18 @@ def unite_actions(input, keywords, domain, separator="_"):
         new_action = " ".join(list_to_unite[index_actions[i]:index_actions[i+1]])
         new_list.append(new_action.replace(" ",separator))
     return new_list
-# parto dal mio stato iniziale
-# cerco i miei oggetti e li categorizzo
-# loop sul mio stato
-# prendo la mia prima azione
-# controllo se soddisfa le mie precondizioni
-#   se non soddisfa ERRORE
-# applico gli effetti positivi
-# applico gli effetti negativi (ho terminato di aggiornare il mio stato)
-# controllo se ho soddisfatto i goals
-# ripeto fino a soddisfazione goals, fine azioni o azione violata
 
+# To create a VALIDATOR in python i need some methods that do the following:
+    # starting from my initial state
+    # categorize my objects
+    # loop through my state
+    # take my first action
+    # check if it satisfies my preconditions
+    #   if it doesn't satisfy, ERROR
+    # apply positive effects
+    # apply negative effects (finished updating my state)
+    # check if I have satisfied the goals
+    # repeat until goals are satisfied, no more actions, or violated action
 def create_starting_structures(plan, domain):
     initial_states = plan['input'].split("<|goals|>")[0].strip().split("<|startofplan|>")[1].strip()
     goal_states = plan['input'].split("<|goals|>")[1].strip().split("<|actions|>")[0].strip()
@@ -950,7 +711,7 @@ def create_starting_structures(plan, domain):
         else:
             dict_goals[goal_state] = False
     return (dict_states, dict_goals, actions)
-
+# Methods that check if the action is executable and execute it 
 def execute_action(states, action, domain):
     # Return a Tuple
     # in the first position the result True, False
@@ -958,89 +719,84 @@ def execute_action(states, action, domain):
     # in the third position the motivation of the wrong execution
     # split my action, on position 0 the action, then the objects
     #print(action)
-    splitted_action = action.split("_")[0] # prendo il nome della mia azione
+    # First i need to verify if the name of the action is correct, then the number of objects and their names 
+    splitted_action = action.split("_")[0] # I get the name of the action
     try:
-        action_parameter = dict_actions_domain[domain][splitted_action] # verifico che l'azione esiste
+        action_parameter = dict_actions_domain[domain][splitted_action] # verify that the action_name is valid
     except:
         action_parameter = None
     if action_parameter is None:
         return (False, states,"action_name_wrong", splitted_action, action, "")
-    splitted_objects = action.split("_")[1:] # ottengo il nome dei miei oggetti definiti nel mio problema
-    action_objects = action_parameter[0] # ottengo gli oggetti accettati dall'azione
-    if len(action_objects) == len(splitted_objects): # verifico che gli oggetti siano in egual numero rispetto a quanti ne richiede la mia azione
-        for i in range(0, len(action_objects)): # scorro i miei oggetti
-            obj_nonumber = ''.join([j for j in splitted_objects[i] if not j.isdigit()]) # calcolo il mio nome dell'oggetto senza tener conto dei numeri
-            if obj_nonumber not in dict_objects_domain[domain][action_objects[i]]: # verifico che l'oggetto si trovi nella lista di nomi possibili associata alla descrizione dell'azione
+    splitted_objects = action.split("_")[1:] # I get the objects
+    action_objects = action_parameter[0] # I get the objects used by the action
+    if len(action_objects) == len(splitted_objects): # I check if the number of objects is correct
+        for i in range(0, len(action_objects)): # I loop through the objects
+            obj_nonumber = ''.join([j for j in splitted_objects[i] if not j.isdigit()]) # I remove the numbers from the object
+            if obj_nonumber not in dict_objects_domain[domain][action_objects[i]]: # I check if the object is valid
                 return (False, states, "object_name_wrong", splitted_action, obj_nonumber, splitted_objects[i])
     else:
         return (False, states, "object_number_wrong", splitted_action, len(action_objects), len(splitted_objects))
-    
-    action_prec = action_parameter[1] # prendo le precondizioni della mia azione
+    # Now i can verify if the action is executable (the preconditions are satisfied)
+    action_prec = action_parameter[1] # I get the not grounded preconditions
     violed_precondtion = False
     violed_preconditions_list = []
     violed_preconditions_list_nonumber = []
-    for prec in action_prec: # scorro le mie precondizioni
+    for prec in action_prec: # I loop through the preconditions
         prec_list = prec.split(" ")
-        prec_parametrized = "" + prec_list[0] # metto il mio predicato
-        for obj in prec_list[1:]: # scorro gli oggetti della mia precondizione
-            prec_parametrized = prec_parametrized + "_" + splitted_objects[int(obj)] # sostituisco gli oggetti generici ai miei oggetti del problema
-        if prec_parametrized not in states.keys(): # controllo se la mia precondizione esiste come chiave del dizionario (se non esiste non è vera)
+        prec_parametrized = "" + prec_list[0] # I get the predicate
+        for obj in prec_list[1:]: # I iterate through the objects
+            prec_parametrized = prec_parametrized + "_" + splitted_objects[int(obj)] # I replace the object with the one in the action
+        if prec_parametrized not in states.keys(): # I check if the predicate is in the states
             violed_precondtion = True
             violed_preconditions_list.append(prec_parametrized)
-            violed_preconditions_list_nonumber.append(rimuovi_numeri(prec_parametrized))
-        elif states[prec_parametrized] is False: # controllo che la mia precondizione sia vera per eseguire l'azione
+            violed_preconditions_list_nonumber.append(remove_numbers(prec_parametrized))
+        elif states[prec_parametrized] is False: # I check if the predicate is false -> i can't execute the action
             violed_precondtion = True
             violed_preconditions_list.append(prec_parametrized)
-            violed_preconditions_list_nonumber.append(rimuovi_numeri(prec_parametrized))
+            violed_preconditions_list_nonumber.append(remove_numbers(prec_parametrized))
         else:
             pass
     if violed_precondtion is True:
         return (False, states, "violed_preconditions", violed_preconditions_list_nonumber, violed_preconditions_list, splitted_action) 
         
-    # eseguo gli effetti negativi
-    action_neg = action_parameter[3] # prendo i miei effetti negativi
-    for neg in action_neg: # li scorro
+    # I execute the action (negative effects)
+    action_neg = action_parameter[3] # I get the negative effects
+    for neg in action_neg: #  i loop through the negative effects
         neg_list = neg.split(" ") 
-        neg_parametrized = "" + neg_list[0] # ottengo il mio predicato
-        for obj in neg_list[1:]: # per ogni oggetto (rappresentato come indice)
-            neg_parametrized = neg_parametrized + "_" + splitted_objects[int(obj)] # vado a sostituirlo col corrispettivo dell'azione in corso
-        states[neg_parametrized] = False # cambio il valore nei miei stati
-        #print("ho reso falso " + neg_parametrized)
-
-    # eseguo gli effetti additivi
-    action_plus = action_parameter[2] # prendo i miei effetti additivi
-    for plus in action_plus: # li scorro
+        neg_parametrized = "" + neg_list[0] # I get the predicate
+        for obj in neg_list[1:]: # I iterate through the objects
+            neg_parametrized = neg_parametrized + "_" + splitted_objects[int(obj)] # I replace the object with the one in the action
+        states[neg_parametrized] = False # I change the value in my states
+    
+    # I execute the action (positive effects)
+    action_plus = action_parameter[2] # I get the positive effects
+    for plus in action_plus: # I loop through the positive effects
         plus_list = plus.split(" ")
-        plus_parametrized = "" + plus_list[0] # ottengo il mio predicato
-        for obj in plus_list[1:]: # per ogni oggetto (rappresentato come indice)
-            plus_parametrized = plus_parametrized + "_" + splitted_objects[int(obj)] # vado a sostituirlo col corrispettivo dell'azione in corso
-        states[plus_parametrized] = True # cambio il valore nei miei stati
-        #print("ho reso vero " + plus_parametrized)
+        plus_parametrized = "" + plus_list[0] # I get the predicate
+        for obj in plus_list[1:]: # I iterate through the objects
+            plus_parametrized = plus_parametrized + "_" + splitted_objects[int(obj)] # I replace the object with the one in the action
+        states[plus_parametrized] = True # I change the value in my states
     
     return (True, states, "action_succesfull")
 
+# Method that checks if the goals are satisfied
 def check_goals(states, goal_states, domain):
     all_goals_satisfied = True
     goals_unsatisfied_list = []
     goals_unsatisfied_list_nonumber = []
-    #print(goal_states)
     for goal in goal_states.keys():
-        #print("Analizzo il goal " + goal)
         if goal not in states.keys():
             goal_states[goal] = False
             all_goals_satisfied = False
             goals_unsatisfied_list.append(goal)
-            goals_unsatisfied_list_nonumber.append(rimuovi_numeri(goal))
-            #print("Il mio goal non è negli stati visti")
+            goals_unsatisfied_list_nonumber.append(remove_numbers(goal))
         elif states[goal] is False:
             goal_states[goal] = False
             all_goals_satisfied = False
             goals_unsatisfied_list.append(goal)
-            goals_unsatisfied_list_nonumber.append(rimuovi_numeri(goal))
-            #print("Il mio goal è negli stati visti falso")
+            goals_unsatisfied_list_nonumber.append(remove_numbers(goal))
         else:
             goal_states[goal] = True
-            #print("Il mio goal è negli stati visti vero")
     if all_goals_satisfied is True:
         return (True, goal_states, "goals_succesfull")
     else:
@@ -1062,10 +818,8 @@ def parse_problem(plan, domain):
     result_goals = check_goals(init_state, goal_state, domain)
     if result_goals[0] is True:
         return (result_goals[0], result_goals[1], result_goals[2], len(actions))
-        #print(result_goals[2])
     else:
         pass
-        #print(result_goals[2])
 
     state = init_state
     j = 0
@@ -1077,317 +831,24 @@ def parse_problem(plan, domain):
             state = result[1]
             result_goals = check_goals(state, goal_state, domain)
             if result_goals[0] is True:
-                #print(result_goals[2])
                 j = j + 1
                 break
             else:
                 pass
-                #print(result_goals[2])
         else:
             result_goals = check_goals(state, goal_state, domain)
             return (result[0], result_goals[1], result[2], result[3], result[4], result[5], j)
-            #print(result[2])
-            #print(result[1])
             break
         j = j + 1
         end_act = time.time()
-        #print("Ho impiegato per fare una azione: " + str(end_act-start_act))
 
     number_missing_actions = len(actions) - j
     end = time.time()
-    #print("Ho impiegato " + str(end-start))
     return (result_goals[0], result_goals[1], result_goals[2], number_missing_actions)
 
 def remove_blanks(stringa):
     return re.sub(r'\s+(\d)', r'\1', stringa)
 
 
-def rimuovi_numeri(stringa):
+def remove_numbers(stringa):
     return ''.join([i for i in stringa if not i.isdigit()])
-
-############################################################################################################
-# REWARD
-############################################################################################################
-def calculate_reward(plan, 
-                    domain , 
-                    discounted = False, 
-                    discount_factor = 0.99, 
-                    use_percentage = True, 
-                    no_penalty = False, 
-                    traslated_reward = False,
-                    use_reward_eos = False,
-                    use_penalty_unused_actions = False,
-                    reward_type = "standard",):
-    if domain == "satellite":
-        dict_actions_domain['satellite'] = dict_actions_s_normal
-    elif domain == "satellite_types":
-        dict_actions_domain['satellite'] = dict_actions_s_invariant
-        domain = "satellite"
-    # Creo le strutture necessarie
-    init_structures = create_starting_structures(plan, domain)
-    init_state = init_structures[0]
-    goal_state = init_structures[1]
-    actions = init_structures[2]
-    start = time.time()
-
-    # Calcolo il reward
-    
-    if discounted is False and reward_type in ["replicated", "standard"]:
-        score = calculate_default_reward(init_state, goal_state, actions, domain, use_percentage, no_penalty)
-        if traslated_reward is True and no_penalty is False:
-            if use_percentage:
-                score = (score+1)/2.0
-            else:
-                score = (score+len(goal_state.keys()))/2.0
-        if reward_type == "standard":
-            return score
-        else:
-            # creo un vettore di dimensione uguale al numero di azioni+1 
-            # e assegno a ciascuna azione il reward ottenuto
-            score = [score for i in range(len(actions)+1)]
-            final_score = distribute_reward_to_tokens(actions, score)
-            return final_score
-
-    # Discounted rewards richiede di mantenere in memoria una lista di rewards per ora non funziona con replicated.
-    if discounted is True and reward_type in ["standard", "distributed", "cumulative"]:
-        score = calculate_discounted_reward(init_state, goal_state, actions, domain, use_percentage, no_penalty, discount_factor, reward_type,
-                                            reward_eos=use_reward_eos, penalty_unused_actions=use_penalty_unused_actions)
-        if traslated_reward is True and no_penalty is False:
-            if use_percentage:
-                score = (score+1)/2.0
-            else:
-                score = (score+len(goal_state.keys()))/2.0
-        if reward_type == "standard":
-            if type(score) == list:
-                raise ValueError(f"Standard reward returned as a list: {score}")
-            return score
-        else:
-            # If we have vectorized_rewards but the model doesn't produce an action it is possible that the score vector has a single value.
-            if len(score) == 1:
-                warnings.warn(f"Score is a single value {score}")
-                warnings.warn(f"init_state: {init_state}")
-                warnings.warn(f"goal_state: {goal_state}")
-                warnings.warn(f"actions: {actions}")
-                warnings.warn(f"domain: {domain}")
-
-            return score
-    
-    # Se non ho scelto un reward type valido
-    raise ValueError(f"Invalid configuration: discounted={discounted}, reward={reward_type}")
-
-# Questa funzione calcola il reward tradizionale e ne ritorna il valore. Se si usa replicated verra' poi distribuito, altrimenti no e si ritornera' il valore singolo
-def calculate_default_reward(init_state, goal_state, actions, domain, use_percentage, no_penalty):
-    result_goals = check_goals(init_state, goal_state, domain)
-    if result_goals[0] is True:
-        if use_percentage is True:
-            return 1
-        else:
-            return len(result_goals[1].keys())  
-    else:
-        pass
-    state = init_state
-    j = 0
-    for action in actions:
-        start_act = time.time()
-        result = execute_action(state, action, domain) # Eseguo l'azione e ne verifico la correttezza
-        if result[0] is True: # Se l'azione e' eseguibile tutto ok
-            state = result[1]
-            result_goals = check_goals(state, goal_state, domain)
-            if result_goals[0] is True:
-                if use_percentage is True:
-                    return 1
-                else:
-                    return len(result_goals[1].keys())
-            else:
-                pass # Non ho raggiunto i goals...continuo
-        else: # Se l'azione non e' eseguibile -> controllo quanti goals sono e penalizzo
-            result_goals = check_goals(state, goal_state, domain)
-            goals_satisfied = result_goals[1]
-            count = 0
-            n_goals = len(goals_satisfied.keys())
-            for goal in goals_satisfied.keys():
-                if goals_satisfied[goal] is True:
-                    count += 1
-            if no_penalty is True:
-                if use_percentage is True:
-                    return (count/n_goals)
-                else:
-                    return (count)
-            else:
-                #Occorre penalizzare qui
-                if use_percentage is True:
-                    return (count/n_goals) -1
-                else:
-                    return count -(1*n_goals)
-        j = j + 1
-        end_act = time.time()
-
-    number_missing_actions = len(actions) - j
-    end = time.time()
-    goals_satisfied = result_goals[1]
-    count = 0
-    n_goals = len(goals_satisfied.keys())
-    for goal in goals_satisfied.keys():
-        if goals_satisfied[goal] is True:
-            count += 1
-    if use_percentage is True:
-        return count/n_goals
-    else:
-        return count
-
-# Questa funzione calcola il reward -> nel caso standard restituisce un singolo valore, nel caso distributed restituisce un vettore di valori dipendentemente dalla tipologia scelta
-
-def calculate_discounted_reward(init_state, 
-                                goal_state, 
-                                actions, 
-                                domain, 
-                                use_percentage, 
-                                no_penalty, 
-                                discount_factor, 
-                                reward_type, 
-                                reward_eos=False, penalty_unused_actions=False):
-    rewards = []
-    n_goals = len(goal_state.keys())
-    new_goal_satisfied = {}
-    for goal in goal_state.keys():
-        new_goal_satisfied[goal] = False
-        
-    vectorized_rewards = ((reward_type == "distributed") or (reward_type == "cumulative"))
-
-    result_goals = check_goals(init_state, goal_state, domain)
-    goal_satisfied_count = 0
-    for goal in goal_state.keys():
-        if result_goals[1][goal] is True and new_goal_satisfied[goal] is True: # se un goal è già soddisfatto
-            pass
-        elif result_goals[1][goal] is False and new_goal_satisfied[goal] is True: # un goal che era soddisfatto non è più soddisfatto
-            pass
-        elif result_goals[1][goal] is False and new_goal_satisfied[goal] is False: # il goal non è soddisfatto
-            pass
-        else: # abbiamo soddisfatto un goal (result_goals[1][goal] is True and new_goal_satisfied[goal] is False)
-            goal_satisfied_count += 1
-            new_goal_satisfied[goal] = True
-    if use_percentage is True:
-        rewards.append(goal_satisfied_count/n_goals)
-    else:
-        rewards.append(goal_satisfied_count)
-
-    if result_goals[0] is True:
-        reward_eos = rewards[0] if reward_eos else 0.0
-        coeff_penalty_unused_actions = -0.1 if use_percentage is True else -1
-        penalty_unused_actions = coeff_penalty_unused_actions if penalty_unused_actions else 0.0
-        if vectorized_rewards:
-            return distribute_reward_to_tokens(actions, compute_reward(rewards, discount_factor=discount_factor, reward_type = reward_type,), reward_eos=reward_eos, penalty_unused_actions=penalty_unused_actions)
-        else:
-            return compute_reward(rewards, discount_factor=discount_factor, reward_type = reward_type,)
-    else:
-        pass
-
-    state = init_state
-    j = 0
-    for action in actions:
-        result = execute_action(state, action, domain)
-        if result[0] is True:
-            state = result[1]
-            result_goals = check_goals(state, goal_state, domain)
-
-            # valuto quanti goal la mia azione ha soddisfatto
-            goal_satisfied_count = 0
-            for goal in goal_state.keys():
-                if result_goals[1][goal] is True and new_goal_satisfied[goal] is True: # se un goal è già soddisfatto
-                    pass
-                elif result_goals[1][goal] is False and new_goal_satisfied[goal] is True: # un goal che era soddisfatto non è più soddisfatto
-                    pass
-                elif result_goals[1][goal] is False and new_goal_satisfied[goal] is False: # il goal non è soddisfatto
-                    pass
-                else: # abbiamo soddisfatto un goal (result_goals[1][goal] is True and new_goal_satisfied[goal] is False)
-                    goal_satisfied_count += 1
-                    new_goal_satisfied[goal] = True
-            if use_percentage is True:
-                rewards.append(goal_satisfied_count/n_goals)
-            else:
-                rewards.append(goal_satisfied_count)
-
-            if result_goals[0] is True:
-                coeff_percentage_eos = 1 if use_percentage else n_goals
-                reward_eos = coeff_percentage_eos if reward_eos else 0.0
-                coeff_penalty_unused_actions = -0.1 if use_percentage else -1
-                penalty_unused_actions = coeff_penalty_unused_actions if penalty_unused_actions else 0.0
-                if vectorized_rewards:
-                    return distribute_reward_to_tokens(actions, compute_reward(rewards, discount_factor=discount_factor, reward_type = reward_type,), reward_eos=reward_eos, penalty_unused_actions=penalty_unused_actions)
-                else:
-                    return compute_reward(rewards, discount_factor=discount_factor, reward_type = reward_type,)
-        
-        else: # Qui succede quando un azione ROMPE le precondizioni
-            if no_penalty is False: # se voglio penalizzare...
-                if use_percentage is True:
-                    rewards.append(-1.0)
-                else:
-                    rewards.append(-1*n_goals)
-            
-            if vectorized_rewards:
-                reward_eos = 0.0
-                penalty_unused_actions = 0.0
-                return distribute_reward_to_tokens(actions, compute_reward(rewards, discount_factor=discount_factor, reward_type = reward_type,), reward_eos=reward_eos, penalty_unused_actions=penalty_unused_actions)
-            else:
-                return compute_reward(rewards, discount_factor=discount_factor, reward_type = reward_type,)  
-
-    if vectorized_rewards:
-        reward_eos = 0.0
-        coeff_penalty_unused_actions = 0.0
-        return distribute_reward_to_tokens(actions, compute_reward(rewards, discount_factor=discount_factor, reward_type = reward_type,), reward_eos=reward_eos, penalty_unused_actions=penalty_unused_actions)
-    else:
-        return compute_reward(rewards, discount_factor=discount_factor, reward_type = reward_type,)  
-
-# Questa funzione calcola il reward -> nel caso standard restituisce un singolo valore, nel caso distributed restituisce un vettore di valori dipendentemente dalla tipologia scelta
-def compute_reward(rewards, discount_factor = 0.99, reward_type = "standard"):
-    if reward_type == "standard":
-        rewards.reverse()
-        reward_sum = 0
-        for reward in rewards:
-            reward_sum = reward_sum*discount_factor + reward
-        return reward_sum
-
-    elif reward_type == "cumulative":
-        reward_sum = 0
-        reward_list = []
-        exp_count = 0
-        for reward in rewards:
-            reward_sum = reward_sum + (discount_factor**exp_count)*reward
-            reward_list.append(reward_sum)
-            exp_count += 1
-        return reward_list
-
-    elif reward_type == "distributed":
-        reward_list = []
-        exp_count = 0
-        for reward in rewards:
-            current = (discount_factor**exp_count)*reward
-            reward_list.append(current)
-            exp_count += 1
-        return reward_list
-    else:
-        raise ValueError(f"Invalid reward type {reward_type}")
-
-def distribute_reward_to_tokens(actions, rewards, reward_eos=0.0, penalty_unused_actions=0.0):
-    if len(actions) == 0:
-        return [rewards[0]]
-    token_reward_list = [] # Skippo il primo reward perchè è il reward per lo stato iniziale
-
-    if len(actions) == (len(rewards)-1):
-        #print("Ok")
-        pass
-    else:
-        #print("The plan reaches the goals and generates more actions")
-        for i in range(len(actions)-len(rewards)+1):
-            rewards.append(penalty_unused_actions)
-            reward_eos = 0.0 # ha generato azioni in più in cui non si ha una verifica delle precondizioni, quindi EOS non è detto sia corretto 
-
-    for index in range(0,len(actions)):
-        action = actions[index]
-        reward = rewards[index+1]
-        # TODO qui potrei passare il tokenizer.
-        token_action_len = len(action.strip().split("_"))
-        for i in range(0,token_action_len):
-            token_reward_list.append(reward)
-    token_reward_list.append(reward_eos)
-    return token_reward_list

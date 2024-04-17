@@ -44,89 +44,88 @@ class PlanGenerationArgs:
     """
     dataset_dir: Optional[str] = field(
         default="dataset/json/logistics_invariants/20_plans.json",
-        metadata={"help": "File relativo al test set da utilizzare."},
+        metadata={"help": "Folder containing the dataset."},
     )
     tokenizer_dir: Optional[str] = field(
         default="",
-        metadata={"help": "Cartella contenente i file del tokenizer."},
+        metadata={"help": "Folder containing the tokenizer."},
     )
     model_dir: Optional[str] = field(
         default="",
-        metadata={"help": "Cartella contenente i file del modello."},
+        metadata={"help": "Folder containing the model."},
     )
     output_dir: Optional[str] = field(
-        default="output", metadata={"help": "Cartella di output."}
+        default="output", metadata={"help": "Folder where to save the generated plans."}
     )
     max_length: Optional[int] = field(
         default=2048,
-        metadata={"help": "Lunghezza massima dei piani"},
+        metadata={"help": "Maximum length of the generated plan. Default is 2048."},
     )
     num_beams: Optional[int] = field(
         default=1,
-        metadata={"help": "Numero di beam per la generazione utilizzando la beam search. Valore di default è 1, che significa generazione greedy."}
+        metadata={"help": "Number of beams to use during generation. Default is 1 (greedy)."}
     )
     percentage_actions_seen: Optional[int] = field(
-        default=0, metadata={"help": "Numero di azioni da aggiungere all'input iniziale."}
+        default=0, metadata={"help": "Percentage of actions to show in the generated plan."}
     )
     pddl_dir: Optional[str] = field(
         default="pddl",
-        metadata={"help": "Cartella dei file PDDL dei problemi"},
+        metadata={"help": "Pddl directory containing the domain and problem files."},
     )
     pddl_domain_file: Optional[str] = field(
         default="domain.pddl",
-        metadata={"help": "Nome del file che contiene la definizione del dominio"},
+        metadata={"help": "File containing the domain definition."},
     )
     log_file_name: Optional[str] = field(
-        default="generation.log", metadata={"help": "Nome del file di log."}
+        default="generation.log", metadata={"help": "File where to save the logs."}
     )
     batch_size: Optional[int] = field(
-        default=4, metadata={"help": "Batch size da usare durante la generazione."}
+        default=4, metadata={"help": "Batch size for generation. Default is 4."}
     )
     save_after: Optional[int] = field(
         default=10,
-        metadata={
-            "help": (
-                "Dopo quante batch vuoi salvare l'output della generazione "
-                "per esempiop se batch_size è 4 e save_after è 10, allora "
-                "dopo 10 batch l'output sarà salvato, ovvero il file conterrà 40 piani generati."
-            )
-        },
+        metadata={"help": ("Save the output to file every save_after steps. ") },
     )
     sort_initial_state: Optional[bool] = field(
-        default=True, metadata={"help": "Per indicare se è necessario fare lo shuffle dello stato iniziale."}
+        default=True, metadata={"help": "Sort the initial state fluents."}
     )
     seed: Optional[int] = field(
-        default=7, metadata={"help": "Seed per riproducibilità dei risultati."}
+        default=7, metadata={"help": "Seed."}
+    )
+    top_k: Optional[int] = field(
+        default=-1, metadata={"help": "If > 0, use top-k sampling. Default is -1."}
+    )
+    top_p: Optional[float] = field(
+        default=-1, metadata={"help": "If > 0, use top-p sampling. Default is -1."}
+    )
+    num_return_sequences: Optional[int] = field(
+        default=1, metadata={"help": "Number of sequences to generate. Default is 1."}
+    )
+    domain: Optional[str] = field(
+        default="logistics", metadata={"help":  "Domain of the dataset. Default is logistics."}
     )
     is_old_model: Optional[bool] = field(  
-        default=False, metadata={"help": "Per indicare se il modello è vecchio."}
+        default=False, metadata={"help": "DEPRECATED: To indicate if the model is old."}
     )
     super_model: Optional[bool] = field(
-        default=False, metadata={"help": "Per indicare se il modello è super."})
+        default=False, metadata={"help": "DEPRECATED: To indicate if the model is super (it was an old version of PlanGPT, which separated even the numbers from the object names)."}
+    )
     reverse: Optional[bool] = field(
-        default=False, metadata={"help": "Per indicare se il modello è reverse."})
-    top_k: Optional[int] = field(
-        default=-1, metadata={"help": "Per indicare se è da usare top-k"})
-    top_p: Optional[float] = field(
-        default=-1, metadata={"help": "Per indicare se è da usare top-p"})
-    num_return_sequences: Optional[int] = field(
-        default=1, metadata={"help": "Per indicare se è da usare la beam search"})
-    domain: Optional[str] = field(
-        default="logistics", metadata={"help": "Nome del dominio"})
+        default=False, metadata={"help": "DEPRECATED: To indicate if the model is reverse (another older version of PlanGPT, trained to generated a plan from the last action till the first)."}
+    )
+
 
 logger = logging.getLogger(__name__)
 
 
 def main():
-    # Parsing delle opzioni
+    # Parsing of the arguments
     parser = HfArgumentParser(PlanGenerationArgs)
     if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
         (args,) = parser.parse_json_file(json_file=os.path.abspath(sys.argv[1]))
     else:
         (args,) = parser.parse_args_into_dataclasses()
-    print(args.top_k)
-    print(args.num_return_sequences)
-    # Creazione delle cartelle di output e setup del logging
+    # Creating the output directory
     tmp_plan_dir = f"{args.percentage_actions_seen}_actions"
     if args.top_k > 0:
         tmp_plan_dir = tmp_plan_dir + f"_top_k_{args.top_k}"
@@ -145,7 +144,7 @@ def main():
         ],
     )
 
-    # Caricamento del dataset, del tokenizer e del modello
+    # Loading the dataset, tokenizer, and model
 
     if args.is_old_model:
         dataset = load_dataset("json", data_dir=args.dataset_dir)
@@ -167,68 +166,47 @@ def main():
     logger.info(tokenizer)
     random.seed(args.seed)
 
-       # Preprocessing del dataset e tokenizzazione
+    # Preprocessing the dataset
     dataset = dataset["test"]       
-    logger.info('Rimozione esempi duplicati...')
+    logger.info('Removing duplicates..')
 
     df = pd.DataFrame(dataset) 
-    valori_univoci = df["pddl_problem_file"].nunique()
-    logger.info(f"Numero di valori univoci nella colonna dei problemi:{valori_univoci}")
-    # Rimuovi i duplicati basandoti su una o più colonne specifiche
+    uniques = df["pddl_problem_file"].nunique()
+    logger.info(f"Number of unique problems :{uniques}")
     df = df.drop_duplicates(subset="pddl_problem_file")
-
-    # Ora converti il DataFrame nuovamente in un dataset
     new_dataset = Dataset.from_pandas(df)
-    new_dataset = new_dataset.remove_columns(['__index_level_0__'])
-    logger.info(f'Dimensione originale del dataset: {len(dataset)}')
-    logger.info(f'Nuova dimensione del dataset: {len(new_dataset)}')
+    if '__index_level_0__' in new_dataset.column_names:
+        new_dataset = new_dataset.remove_columns(['__index_level_0__'])
+
+    logger.info(f'Original dataset dim: {len(dataset)}')
+    logger.info(f'New dataset dim: {len(new_dataset)}')
 
     dataset = new_dataset
-    # Colonne superflue da rimuovere poi
     to_remove_column_names = ["name", "initial_state", "goals", "len_initial_state", "len_goals", "len_plan", "pddl_problem_file"]
-
-    # Funzione di preprocessing che impila goals e stato iniziale
+    # Preprocessing function
     def shuffle_or_not_shuffle(examples):
         output = []
         for state, goals, actions in zip(examples["initial_state"], examples["goals"], examples["actions"]):
             
             if args.sort_initial_state:
-                # Shuffle stato iniziale
                 state = metric.unite_actions(state, 
                                              list(metric.dict_predicates_domain[args.domain].keys()),
                                              args.domain,)
-                #random.shuffle(state)
-                #if args.domain == "satellite":
-                #    types_predicates_name = ['satellite', 'direction', 'instrument', 'mode',]
-                #    types_preds = [x for x in state if x.split('_')[0] in types_predicates_name]
-                #    #print(types_preds)
-                #    state = set(state) - set(types_preds)
-                #    #print(state)
-                #   state = sorted(types_preds) + sorted(state)
-                #  #print(state)
-                #    state = " ".join(state).replace('_', ' ')
-                #else:
                 state = [x.replace("_", " ") for x in state]
                 state = sorted(state)
-                #state = " ".join(state).replace('_', ' ')
-                state = " ".join(state)
-                # Shuffle goals
+                state = " ".join(state)                
                 goals_list = metric.unite_actions(goals,
-                                                    list(metric.dict_predicates_domain[args.domain].keys()),
+                                            list(metric.dict_predicates_domain[args.domain].keys()),
                                                     args.domain,)
-                #random.shuffle(goals_list)
                 goals_list = [x.replace("_", " ") for x in goals_list]
                 goals_list = sorted(goals_list)
                 goals = " ".join(goals_list)
-
             
             new_state = state + " <|goals|> " + goals
             
             new_state = new_state + " <|actions|> "
             action_list = actions.split(" ")
             if args.percentage_actions_seen > 0:
-                # VA SOLO PER LOGISTICS -> sistemalo
-                # Unisco le azioni ne prendo la percentuale e poi le ridivido
                 actions_plan = metric.unite_actions(" ".join(action_list), 
                                                     list(metric.dict_actions_domain[args.domain].keys()), 
                                                     args.domain)
@@ -236,21 +214,19 @@ def main():
                 actions_plan = actions_plan[:num_actions_to_show]
                 action_string = " ".join(actions_plan).replace('_', ' ')
             else:
-                # Non faccio nulla
                 action_string = ""
             if action_string != "":
                 new_state = new_state + " " + action_string
             output.append(new_state)
         return {"states": output}
     
-    # Funzione di tokenizzazione che preso un piano tokenizza lo stato iniziale + goals 
+    # Tokenization function 
     def tokenize_function(examples):
         return tokenizer(
             examples["states"],
-            # Non aggiunta la traccia
             return_token_type_ids=False,
         )
-    #Primo pre-processing del dataset
+    # First preprocessing of the dataset
     pre_processed_datasets = dataset.map(
             shuffle_or_not_shuffle,
             batched=True,
@@ -268,7 +244,6 @@ def main():
     
     test_dataset = tokenized_datasets
 
-    #test_dataset = test_dataset.select(range(100))
     logger.info(test_dataset)
     logger.info("You can safely ignore the warning above ^^")
 
@@ -312,7 +287,6 @@ def main():
         start_time = time.time()
         with torch.no_grad():
             if args.top_k > 0 and args.top_p == -1:
-                # Usare solo top-k
                 outputs = model.generate(
                     inputs,
                     num_return_sequences=args.num_return_sequences,
@@ -322,7 +296,6 @@ def main():
                     top_k=args.top_k,)
                 
             elif args.top_p > 0 and args.top_k == -1:
-                # Usare solo top-p
                 outputs = model.generate(
                     inputs,
                     num_return_sequences=args.num_return_sequences,
@@ -331,7 +304,6 @@ def main():
                     pad_token_id=tokenizer.pad_token_id,
                     top_p=args.top_p,)
             elif args.top_p > 0 and args.top_k > 0:
-                # Usare sia top-k che top-p
                 outputs = model.generate(
                     inputs,
                     do_sample=True, 
@@ -341,7 +313,6 @@ def main():
                     top_k=args.top_k,
                     top_p=args.top_p,)
             else:   
-                # Usare solo greedy      
                 outputs = model.generate(
                     inputs,
                     num_beams=args.num_beams,
@@ -350,10 +321,10 @@ def main():
                     pad_token_id=tokenizer.pad_token_id,
                 )
         end_time = time.time()
-        for i in range(batch["input_ids"].shape[0]):# Itero sul batch_size
+        for i in range(batch["input_ids"].shape[0]):
             results = []
-            for j in range(args.num_return_sequences): # Itero sul numero di sequenze generate
-                if batch["input_ids"].shape[0] == 1: # Se il batch_size è 1. ATTENZIONE LA GENERAZIONE VA SOLO CON BATCH_SIZE = 1
+            for j in range(args.num_return_sequences):
+                if batch["input_ids"].shape[0] == 1: # If batch size is 1, outputs is a tensor
                     generated_plan = outputs[j]
                 else:
                     generated_plan = outputs[i][j]
@@ -374,12 +345,7 @@ def main():
                         if pad_idx.shape[0]:
                             generated_plan = generated_plan[:pad_idx[0]]
             
-                #actions_idx = (generated_plan == actions_token_id).nonzero(as_tuple=True)[0]
-                #actions_idx = torch.where(generated_plan == actions_token_id)[0]
                 actions_idx = batch["actions_idx"][i]
-                #print(tokenizer.decode(generated_plan))
-                #print(f"Real action id: {real_action_id}")
-                #print(f"Generated action id: {actions_idx}")
                 generated_plan = generated_plan[actions_idx + 1:]
 
                 sop_idx = (batch["input_ids"][i] == tokenizer.bos_token_id).nonzero(
@@ -389,15 +355,13 @@ def main():
                 super_model = args.super_model
                 import re
 
-                def rimuovi_spazi(stringa):
+                def remove_blanks(stringa):
                     return re.sub(r'\s+(\d)', r'\1', stringa)
                 if (super_model):
-                    plan = rimuovi_spazi(tokenizer.decode(generated_plan))
+                    plan = remove_blanks(tokenizer.decode(generated_plan))
                 else:
                     plan = tokenizer.decode(generated_plan)
                 
-                # TODO: Attenzione per le azioni in percentuale in ingresso bisogna fare il reverse anche della traccia
-                # TODO: reverse va solo con logistics da modificare lo script di preproccesser.
                 if args.reverse:
                     actions_plan = metric.unite_actions(plan, 
                                                         list(metric.dict_actions_domain[args.domain].keys()), 
