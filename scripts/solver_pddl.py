@@ -322,8 +322,7 @@ def get_plan_for_problem(pddl_problem_file, domain="logistics", typed_domain=Tru
     logger.info(f'Goals: {goals}')
 
     # Recover the objects from the initial state
-    # In the case of blocksworld, I build a string that contains 
-    all the blocks and I parse that to get the names of the blocks, the rest is the same
+    # In the case of blocksworld, I build a string that contains all the blocks and I parse that to get the names of the blocks, the rest is the same
     if domain == "blocksworld":
         object_dict = construct_object_dict(" ".join(blocks), domain)
     else:

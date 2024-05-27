@@ -33,7 +33,7 @@ from datasets import Dataset
 import pandas as pd
 
 from typing import Optional
-import new_rewards as metric
+import metric
 
 
 # Class used to define the possible arguments for training
@@ -42,6 +42,7 @@ class PlanGenerationArgs:
     """
     Options for plan generation.
     """
+
     dataset_dir: Optional[str] = field(
         default="dataset/json/logistics_invariants/20_plans.json",
         metadata={"help": "Folder containing the dataset."},
@@ -63,10 +64,13 @@ class PlanGenerationArgs:
     )
     num_beams: Optional[int] = field(
         default=1,
-        metadata={"help": "Number of beams to use during generation. Default is 1 (greedy)."}
+        metadata={
+            "help": "Number of beams to use during generation. Default is 1 (greedy)."
+        },
     )
     percentage_actions_seen: Optional[int] = field(
-        default=0, metadata={"help": "Percentage of actions to show in the generated plan."}
+        default=0,
+        metadata={"help": "Percentage of actions to show in the generated plan."},
     )
     pddl_dir: Optional[str] = field(
         default="pddl",
@@ -84,14 +88,12 @@ class PlanGenerationArgs:
     )
     save_after: Optional[int] = field(
         default=10,
-        metadata={"help": ("Save the output to file every save_after steps. ") },
+        metadata={"help": ("Save the output to file every save_after steps. ")},
     )
     sort_initial_state: Optional[bool] = field(
         default=True, metadata={"help": "Sort the initial state fluents."}
     )
-    seed: Optional[int] = field(
-        default=7, metadata={"help": "Seed."}
-    )
+    seed: Optional[int] = field(default=7, metadata={"help": "Seed."})
     top_k: Optional[int] = field(
         default=-1, metadata={"help": "If > 0, use top-k sampling. Default is -1."}
     )
@@ -102,16 +104,23 @@ class PlanGenerationArgs:
         default=1, metadata={"help": "Number of sequences to generate. Default is 1."}
     )
     domain: Optional[str] = field(
-        default="logistics", metadata={"help":  "Domain of the dataset. Default is logistics."}
+        default="logistics",
+        metadata={"help": "Domain of the dataset. Default is logistics."},
     )
-    is_old_model: Optional[bool] = field(  
+    is_old_model: Optional[bool] = field(
         default=False, metadata={"help": "DEPRECATED: To indicate if the model is old."}
     )
     super_model: Optional[bool] = field(
-        default=False, metadata={"help": "DEPRECATED: To indicate if the model is super (it was an old version of PlanGPT, which separated even the numbers from the object names)."}
+        default=False,
+        metadata={
+            "help": "DEPRECATED: To indicate if the model is super (it was an old version of PlanGPT, which separated even the numbers from the object names)."
+        },
     )
     reverse: Optional[bool] = field(
-        default=False, metadata={"help": "DEPRECATED: To indicate if the model is reverse (another older version of PlanGPT, trained to generated a plan from the last action till the first)."}
+        default=False,
+        metadata={
+            "help": "DEPRECATED: To indicate if the model is reverse (another older version of PlanGPT, trained to generated a plan from the last action till the first)."
+        },
     )
 
 
@@ -148,100 +157,125 @@ def main():
 
     if args.is_old_model:
         dataset = load_dataset("json", data_dir=args.dataset_dir)
-    else:    
+    else:
         dataset = load_from_disk(args.dataset_dir)
     logger.info(dataset)
-    logger.info(dataset['train'][0])
+    logger.info(dataset["train"][0])
     logger.info("Dataset loaded successfully")
-    tokenizer = AutoTokenizer.from_pretrained(args.tokenizer_dir,
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.tokenizer_dir,
         unk_token="<|unknown|>",
         pad_token="<|pad|>",
         bos_token="<|startofplan|>",
         eos_token="<|endofplan|>",
         mask_token="<|mask|>",
         additional_special_tokens=["<|goals|>", "<|actions|>"],
-        padding_side='right')
+        padding_side="right",
+    )
     model = GPT2PModel.from_pretrained(args.model_dir, device_map="auto")
     logger.info(model)
     logger.info(tokenizer)
     random.seed(args.seed)
 
     # Preprocessing the dataset
-    dataset = dataset["test"]       
-    logger.info('Removing duplicates..')
+    dataset = dataset["test"]
+    logger.info("Removing duplicates..")
 
-    df = pd.DataFrame(dataset) 
+    df = pd.DataFrame(dataset)
     uniques = df["pddl_problem_file"].nunique()
     logger.info(f"Number of unique problems :{uniques}")
     df = df.drop_duplicates(subset="pddl_problem_file")
     new_dataset = Dataset.from_pandas(df)
-    if '__index_level_0__' in new_dataset.column_names:
-        new_dataset = new_dataset.remove_columns(['__index_level_0__'])
+    if "__index_level_0__" in new_dataset.column_names:
+        new_dataset = new_dataset.remove_columns(["__index_level_0__"])
 
-    logger.info(f'Original dataset dim: {len(dataset)}')
-    logger.info(f'New dataset dim: {len(new_dataset)}')
+    logger.info(f"Original dataset dim: {len(dataset)}")
+    logger.info(f"New dataset dim: {len(new_dataset)}")
 
     dataset = new_dataset
-    to_remove_column_names = ["name", "initial_state", "goals", "len_initial_state", "len_goals", "len_plan", "pddl_problem_file"]
+    to_remove_column_names = [
+        "name",
+        "initial_state",
+        "goals",
+        "len_initial_state",
+        "len_goals",
+        "len_plan",
+        "pddl_problem_file",
+    ]
+
     # Preprocessing function
     def shuffle_or_not_shuffle(examples):
         output = []
-        for state, goals, actions in zip(examples["initial_state"], examples["goals"], examples["actions"]):
-            
+        for state, goals, actions in zip(
+            examples["initial_state"], examples["goals"], examples["actions"]
+        ):
+
             if args.sort_initial_state:
-                state = metric.unite_actions(state, 
-                                             list(metric.dict_predicates_domain[args.domain].keys()),
-                                             args.domain,)
+                state = metric.unite_actions(
+                    state,
+                    list(metric.dict_predicates_domain[args.domain].keys()),
+                    args.domain,
+                )
                 state = [x.replace("_", " ") for x in state]
                 state = sorted(state)
-                state = " ".join(state)                
-                goals_list = metric.unite_actions(goals,
-                                            list(metric.dict_predicates_domain[args.domain].keys()),
-                                                    args.domain,)
+                state = " ".join(state)
+                goals_list = metric.unite_actions(
+                    goals,
+                    list(metric.dict_predicates_domain[args.domain].keys()),
+                    args.domain,
+                )
                 goals_list = [x.replace("_", " ") for x in goals_list]
                 goals_list = sorted(goals_list)
                 goals = " ".join(goals_list)
-            
+
             new_state = state + " <|goals|> " + goals
-            
+
             new_state = new_state + " <|actions|> "
             action_list = actions.split(" ")
             if args.percentage_actions_seen > 0:
-                actions_plan = metric.unite_actions(" ".join(action_list), 
-                                                    list(metric.dict_actions_domain[args.domain].keys()), 
-                                                    args.domain)
-                num_actions_to_show = int(len(actions_plan) * args.percentage_actions_seen/100.0) 
+                actions_plan = metric.unite_actions(
+                    " ".join(action_list),
+                    list(metric.dict_actions_domain[args.domain].keys()),
+                    args.domain,
+                )
+                num_actions_to_show = int(
+                    len(actions_plan) * args.percentage_actions_seen / 100.0
+                )
                 actions_plan = actions_plan[:num_actions_to_show]
-                action_string = " ".join(actions_plan).replace('_', ' ')
+                action_string = " ".join(actions_plan).replace("_", " ")
             else:
                 action_string = ""
             if action_string != "":
                 new_state = new_state + " " + action_string
             output.append(new_state)
         return {"states": output}
-    
-    # Tokenization function 
+
+    # Tokenization function
     def tokenize_function(examples):
         return tokenizer(
             examples["states"],
             return_token_type_ids=False,
         )
+
     # First preprocessing of the dataset
     pre_processed_datasets = dataset.map(
-            shuffle_or_not_shuffle,
-            batched=True,
-            remove_columns=to_remove_column_names,
-            desc=
-                "Sort initial state fluents for every example of the dataset" if (args.sort_initial_state) 
-                else "Concatenation of initial state and goals",)
+        shuffle_or_not_shuffle,
+        batched=True,
+        remove_columns=to_remove_column_names,
+        desc=(
+            "Sort initial state fluents for every example of the dataset"
+            if (args.sort_initial_state)
+            else "Concatenation of initial state and goals"
+        ),
+    )
 
     tokenized_datasets = pre_processed_datasets.map(
-            tokenize_function,
-            batched=True,
-            remove_columns=['actions', 'states'],
-            desc="Running tokenizer on dataset",
+        tokenize_function,
+        batched=True,
+        remove_columns=["actions", "states"],
+        desc="Running tokenizer on dataset",
     )
-    
+
     test_dataset = tokenized_datasets
 
     logger.info(test_dataset)
@@ -249,11 +283,16 @@ def main():
 
     for index in random.sample(range(len(test_dataset)), 3):
         logger.info(f"Sample {index} of the training set: {test_dataset[index]}")
-        logger.info(f"Sample {index} of the training set, shape: {len(test_dataset[index]['input_ids'])}")
-        logger.info(f'Decoded sample {index} of the training set: {tokenizer.decode(test_dataset[index]["input_ids"])}')
-        action_idx = test_dataset[index]['actions_idx']
-        logger.info(f"Check if {index} of the training set has the correct value (<|action|>): {tokenizer.decode(test_dataset[index]['input_ids'][action_idx])}.")
-
+        logger.info(
+            f"Sample {index} of the training set, shape: {len(test_dataset[index]['input_ids'])}"
+        )
+        logger.info(
+            f'Decoded sample {index} of the training set: {tokenizer.decode(test_dataset[index]["input_ids"])}'
+        )
+        action_idx = test_dataset[index]["actions_idx"]
+        logger.info(
+            f"Check if {index} of the training set has the correct value (<|action|>): {tokenizer.decode(test_dataset[index]['input_ids'][action_idx])}."
+        )
 
     data_collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
@@ -275,10 +314,10 @@ def main():
         problem_ids_list = []
         example_ids_list = []
         for i in range(batch["input_ids"].shape[0]):
-            instance = dataset[step * args.batch_size + i]["name"].split("-")[
-                -1
-            ]
-            problem_id = dataset[step * args.batch_size + i]["pddl_problem_file"].split(".")[0]
+            instance = dataset[step * args.batch_size + i]["name"].split("-")[-1]
+            problem_id = dataset[step * args.batch_size + i]["pddl_problem_file"].split(
+                "."
+            )[0]
             example_id = instance.split(".")[0]
             problem_ids_list.append(problem_id)
             example_ids_list.append(example_id)
@@ -293,8 +332,9 @@ def main():
                     do_sample=True,
                     max_length=args.max_length,
                     pad_token_id=tokenizer.pad_token_id,
-                    top_k=args.top_k,)
-                
+                    top_k=args.top_k,
+                )
+
             elif args.top_p > 0 and args.top_k == -1:
                 outputs = model.generate(
                     inputs,
@@ -302,17 +342,19 @@ def main():
                     do_sample=True,
                     max_length=args.max_length,
                     pad_token_id=tokenizer.pad_token_id,
-                    top_p=args.top_p,)
+                    top_p=args.top_p,
+                )
             elif args.top_p > 0 and args.top_k > 0:
                 outputs = model.generate(
                     inputs,
-                    do_sample=True, 
+                    do_sample=True,
                     max_length=args.max_length,
                     num_return_sequences=args.num_return_sequences,
                     pad_token_id=tokenizer.pad_token_id,
                     top_k=args.top_k,
-                    top_p=args.top_p,)
-            else:   
+                    top_p=args.top_p,
+                )
+            else:
                 outputs = model.generate(
                     inputs,
                     num_beams=args.num_beams,
@@ -324,7 +366,9 @@ def main():
         for i in range(batch["input_ids"].shape[0]):
             results = []
             for j in range(args.num_return_sequences):
-                if batch["input_ids"].shape[0] == 1: # If batch size is 1, outputs is a tensor
+                if (
+                    batch["input_ids"].shape[0] == 1
+                ):  # If batch size is 1, outputs is a tensor
                     generated_plan = outputs[j]
                 else:
                     generated_plan = outputs[i][j]
@@ -333,20 +377,24 @@ def main():
                     found_eos = True
                 else:
                     found_eos = False
-                
+
                 if generated_plan[-1] == tokenizer.eos_token_id:
                     generated_plan = generated_plan[:-1]
                 else:
-                    eop_idx = (generated_plan == tokenizer.eos_token_id).nonzero(as_tuple=True)[0]
+                    eop_idx = (generated_plan == tokenizer.eos_token_id).nonzero(
+                        as_tuple=True
+                    )[0]
                     if eop_idx.shape[0]:
-                        generated_plan = generated_plan[:eop_idx[-1]]
+                        generated_plan = generated_plan[: eop_idx[-1]]
                     else:
-                        pad_idx = (generated_plan == tokenizer.pad_token_id).nonzero(as_tuple=True)[0]
+                        pad_idx = (generated_plan == tokenizer.pad_token_id).nonzero(
+                            as_tuple=True
+                        )[0]
                         if pad_idx.shape[0]:
-                            generated_plan = generated_plan[:pad_idx[0]]
-            
+                            generated_plan = generated_plan[: pad_idx[0]]
+
                 actions_idx = batch["actions_idx"][i]
-                generated_plan = generated_plan[actions_idx + 1:]
+                generated_plan = generated_plan[actions_idx + 1 :]
 
                 sop_idx = (batch["input_ids"][i] == tokenizer.bos_token_id).nonzero(
                     as_tuple=True
@@ -356,16 +404,19 @@ def main():
                 import re
 
                 def remove_blanks(stringa):
-                    return re.sub(r'\s+(\d)', r'\1', stringa)
-                if (super_model):
+                    return re.sub(r"\s+(\d)", r"\1", stringa)
+
+                if super_model:
                     plan = remove_blanks(tokenizer.decode(generated_plan))
                 else:
                     plan = tokenizer.decode(generated_plan)
-                
+
                 if args.reverse:
-                    actions_plan = metric.unite_actions(plan, 
-                                                        list(metric.dict_actions_domain[args.domain].keys()), 
-                                                        args.domain)
+                    actions_plan = metric.unite_actions(
+                        plan,
+                        list(metric.dict_actions_domain[args.domain].keys()),
+                        args.domain,
+                    )
                     actions_plan.reverse()
                     plan = " ".join(actions_plan)
                 results.append(plan)
@@ -416,7 +467,9 @@ def write_output_to_file(output_dir=None, generation_output=None, bounds=None):
         for idx, example_output in enumerate(generation_output):
             output_file.write(f"***** Evaluation on example {idx}  *****\n")
             output_file.write(f"--- input: {example_output['input']}\n")
-            output_file.write(f"--- percentage_actions_seen: {example_output['percentage_actions_seen']}\n")
+            output_file.write(
+                f"--- percentage_actions_seen: {example_output['percentage_actions_seen']}\n"
+            )
             output_file.write(f"--- generated_plan: {example_output['plan']}\n")
             output_file.write(f"--- example: {example_output['example_id']}\n")
 
