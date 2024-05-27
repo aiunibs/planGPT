@@ -27,8 +27,8 @@ The generation of plans by planGPT can be done using the script [scripts/plan_ge
     "tokenizer_dir": "MODEL_FOLDER",
     "model_dir": "MODEL_FOLDER",
     "output_dir": "WHERE_TO_SAVE_PLANS",
-    "num_beams": 1/5/10,
-    "num_return_sequences": 1/5/10,
+    "num_beams": 1,
+    "num_return_sequences": 1,
     "percentage_actions_seen": 0,
     "batch_size": 1,
     "save_after": 100,
@@ -40,8 +40,8 @@ The parameters are:
 - *tokenizer_dir*: the folder containing the tokenizer.
 - *model_dir*: the folder containing the model.
 - *output_dir*: the folder where to save the generated plans.
-- *num_beams*: the number of beams to use during the generation.
-- *num_return_sequences*: the number of sequences to return.
+- *num_beams*: the number of beams to use during the generation. For example, 1 means greedy search, 5 means beam search with 5 beams.
+- *num_return_sequences*: the number of sequences to return. For example, 1 means return only the best sequence, 5 means return the 5 best sequences.
 - *percentage_actions_seen*: the percentage of actions seen during the generation (0 means no actions seen, 100 means all actions of a correct plan seen).
 - *batch_size*: the batch size to use during the generation.
 - *save_after*: the number of generations after which save the results.
