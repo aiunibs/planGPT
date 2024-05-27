@@ -1,5 +1,5 @@
 # planGPT -     Learning General Policies for Planning through GPT Models
-This repository includes  the provided code for the paper ```Learning General Policies for Planning through GPT Models```[(link)](https://openreview.net/pdf?id=yB8oafJ8bu). The code includes multiple scripts:
+This repository includes  the provided code for the paper ```Learning General Policies for Planning through GPT Models```[(link)](https://openreview.net/pdf?id=yB8oafJ8bu).The scripts provided are:
 - [scripts/plan_generator.py](scripts/plans_generator.py): script to generate plans given a dataset of planning problems.
 - [scripts/validator.ipynb](scripts/validator.ipynb): script to validate the generated plans.
 - [scripts/solver_pddl.py](scripts/solver_pddl.py): script to generate a planGPT plan using as input a PDDL problem.
