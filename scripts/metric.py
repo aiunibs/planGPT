@@ -213,8 +213,8 @@ dict_predicates_z["in"] = (
     ["aircraft"]
 )
 dict_predicates_z["fuel-level"] = (
-    ["flevel"],
-    ["aircraft"]
+    ["aircraft"],
+    ["flevel"]
 )
 dict_predicates_z["next"] = (
     ["flevel"],
