@@ -16,6 +16,7 @@ In addition, for the dataset and models you will need to download them from the 
 - *Models*: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10908361.svg)](https://doi.org/10.5281/zenodo.10908361)
 - *Datasets*: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10925404.svg)](https://doi.org/10.5281/zenodo.10925404)
 
+All domains are randomized, except for Floortile and Visitall, where the grid structure is kept fixed. For these two domains, we later conducted additional experiments by translating the grid along horizontal and vertical axes, achieving coverage results above 90%. During this process, we discovered around 2,000 duplicate problems between the training and testing sets due to generator issues. After correcting the datasets and repeating the experiments, we obtained identical results, confirming the robustness of our findings. After further checks, no other domains showed any overlap between the training and test problems.
 
 Furthermore, if you want, we provide all the *generations of the plans* in the following link: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10926333.svg)](https://doi.org/10.5281/zenodo.10926333) usable to be validated with the script [scripts/validator.ipynb](scripts/validator.ipynb).
 ## Usage
